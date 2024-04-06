@@ -9,7 +9,6 @@ const Main = () => {
 			<h2>Weather Watch</h2>
 			<p>Enter your location here</p>
 			<input type="text" id="search" />
-			<h4>Weather Results Placeholder</h4>
 			<Search />
 		</Container>
 	);
