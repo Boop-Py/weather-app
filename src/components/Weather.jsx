@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardMedia, Grid, Typography } from '@mui/material';
 import * as weatherIcons from 'weather-icons-react';
-import {WiThermometer, WiStrongWind} from 'weather-icons-react';
+import { WiThermometer, WiStrongWind } from 'weather-icons-react';
 import moment from 'moment';
 
 const Weather = (props) => {
@@ -10,6 +10,8 @@ const Weather = (props) => {
     const longitude = JSON.stringify(props.long)
     const url = "https://api.open-meteo.com/v1/forecast";
 
+
+    // TODO: ran out of time to get the items displaying :( 
     const weatherCodes = [
         { "weatherCode": 0, "description": "Clear sky", "icon": weatherIcons.WiDaySunny },
         { "weatherCode": 1, "description": "Mainly clear", "icon": weatherIcons.WiDaySunnyOvercast },
@@ -17,13 +19,13 @@ const Weather = (props) => {
         { "weatherCode": 3, "description": "Overcast", "icon": weatherIcons.WiCloudy },
         { "weatherCode": 45, "description": "Fog", "icon": weatherIcons.WiFog },
         { "weatherCode": 48, "description": "Depositing rime fog", "icon": weatherIcons.WiFog },
-        { "weatherCode": 51, "description": "Drizzle: Light", "icon": weatherIcons.WiDayShowers },
-        { "weatherCode": 53, "description": "Drizzle: Moderate", "icon": weatherIcons.WiDayRain },
+        { "weatherCode": 51, "description": "Light drizzle", "icon": weatherIcons.WiDayShowers },
+        { "weatherCode": 53, "description": "Moderate drizzle", "icon": weatherIcons.WiDayRain },
         { "weatherCode": 55, "description": "Drizzle: Dense", "icon": weatherIcons.WiDayRainMix },
-        { "weatherCode": 56, "description": "Freezing Drizzle: Light", "icon": weatherIcons.WiDaySleet },
-        { "weatherCode": 57, "description": "Freezing Drizzle: Dense", "icon": weatherIcons.WiDaySleet },
-        { "weatherCode": 61, "description": "Slight Rain", "icon": weatherIcons.WiRainMix },
-        { "weatherCode": 63, "description": "Moderate Rain", "icon": weatherIcons.WiRain },
+        { "weatherCode": 56, "description": "Light freezing drizzle", "icon": weatherIcons.WiDaySleet },
+        { "weatherCode": 57, "description": "Dense freezing drizzle", "icon": weatherIcons.WiDaySleet },
+        { "weatherCode": 61, "description": "Slight rain", "icon": weatherIcons.WiRainMix },
+        { "weatherCode": 63, "description": "Moderate rain", "icon": weatherIcons.WiRain },
         { "weatherCode": 65, "description": "Heavy Rain", "icon": weatherIcons.WiRain },
         { "weatherCode": 66, "description": "Freezing Rain: Light", "icon": weatherIcons.WiDayHail },
         { "weatherCode": 67, "description": "Freezing Rain: Heavy", "icon": weatherIcons.WiDayHail },
@@ -31,9 +33,9 @@ const Weather = (props) => {
         { "weatherCode": 73, "description": "Snow fall: Moderate", "icon": weatherIcons.WiDaySnow },
         { "weatherCode": 75, "description": "Snow fall: Heavy", "icon": weatherIcons.WiDaySnow },
         { "weatherCode": 77, "description": "Snow grains", "icon": weatherIcons.WiDaySnow },
-        { "weatherCode": 80, "description": "Slight rain showers", "icon": weatherIcons.WiDayRain },
-        { "weatherCode": 81, "description": "Moderate rain showers: ", "icon": weatherIcons.WiDayRain },
-        { "weatherCode": 82, "description": "Violent rain showers: ", "icon": weatherIcons.WiDayRain },
+        { "weatherCode": 80, "description": "Slight rain", "icon": weatherIcons.WiDayRain },
+        { "weatherCode": 81, "description": "Moderate rain: ", "icon": weatherIcons.WiDayRain },
+        { "weatherCode": 82, "description": "Violent rain: ", "icon": weatherIcons.WiDayRain },
         { "weatherCode": 85, "description": "Snow showers: Slighty", "icon": weatherIcons.WiDaySnowWind },
         { "weatherCode": 86, "description": "Snow showers: Heavy", "icon": weatherIcons.WiDaySnowWind },
         { "weatherCode": 95, "description": "Thunderstorm: Slight", "icon": weatherIcons.WiDayThunderstorm },
@@ -56,10 +58,10 @@ const Weather = (props) => {
 
                 // format date into a Date object so that 'moment' can use it
                 const formattedDate = new Date(data.daily.time[i])
-                
+
                 //const icon =  weatherIconHelper(data.dailyWeather.weatherCode)
                 const conditionData = weatherCodeHelper(data.daily.weather_code[i])
-
+                console.log(typeof (conditionData.icon))
                 dailyWeatherArray.push({
                     date: moment(formattedDate).format("dddd Do MMMM"),
                     weatherCode: data.daily.weather_code[i],
@@ -71,7 +73,7 @@ const Weather = (props) => {
                 })
                 setWeatherData(dailyWeatherArray);
             }
-            return dailyWeatherArray
+            return dailyWeatherArray;
         }
 
         const getWeatherData = async () => {
@@ -89,19 +91,19 @@ const Weather = (props) => {
     }, [latitude, longitude]);
 
     return (
-        <Grid container spacing={4} flexDirection={"row"}>
+        <Grid container spacing={4} alignItems="stretch">
             {weatherData && (
                 weatherData.map(dailyWeather => (
                     <Grid item xs key={dailyWeather.date}>
-                        <Card style={{ textAlign: "center" }} >
+                        <Card style={{ textAlign: "center", display: 'flex', justifyContent: 'space-between', flexDirection: 'column' }}>
                             <CardContent>
                                 <Typography variant="h5" padding={2}>{dailyWeather.date}</Typography>
                                 <CardMedia
-                                component="img"
-                                height="100"
-                                image={dailyWeather.icon}
-                                alt={dailyWeather.description}
-                            />
+                                    height="100"
+                                    image={dailyWeather.icon}
+                                    alt={dailyWeather.description}
+                                />
+
                                 <Typography variant="h6" padding={2}>{dailyWeather.weatherDescription}</Typography>
                                 <Typography variant="subtitle1" padding={2}><WiThermometer size={30} />{dailyWeather.maxTemp}°C</Typography>
                                 <Typography variant="subtitle1"><WiStrongWind size={30} /> Wind: {dailyWeather.windSpeed}kmh</Typography>

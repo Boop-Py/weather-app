@@ -1,11 +1,12 @@
-import { Box, Button, Grid, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Button, Grid, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
 import Weather from './Weather';
 
 const Search = () => {
-	const lat = 50;
-	const long = 50;
+	const [lat, setLat] = useState("");
+	const [long, setLong] = useState("");
 	const [location, setLocation] = useState("");
+	const [cityName, setCityName] = useState("");
 
 	const searchLocation = async () => {
 		const geocodingApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${location}&count=1&language=en&format=json`
@@ -13,13 +14,15 @@ const Search = () => {
 			const response = await fetch(geocodingApiUrl);
 			const data = await response.json();
 			setLocation(data);
-			console.log(data.results[0].latitude)
-			console.log(data.results[0].longitude)
+			setLat(data.results[0].latitude)
+			setLong(data.results[0].longitude)
+			setCityName(data.results[0].name)
 		} catch (error) {
 			console.error('Error fetching location data:', error);
 		}
+		// TODO: add some decent error handling for incorrect searches
+		// TODO: also, autocomplete would be cool.
 	};
-
 
 	const handleChange = (e) => {
 		setLocation(e.target.value);
@@ -30,24 +33,30 @@ const Search = () => {
 	}
 
 	return (
-		<Grid>
-			<Box padding={4} sx={{
-				width: '90%', maxWidth: '100%'
-			}}>
+		<>
+		<Grid container spacing={2}>
+			<Grid item xs={12}>
 				<TextField
 					variant='outlined'
 					label='Enter City'
 					onChange={handleChange}
-					fullWidth>
+					fullWidth
+				>
 				</TextField>
+			</Grid>
+			<Grid item>
 				<Button variant="contained" size="large" onClick={handleSubmit}>Search</Button>
-			</Box>
-			{location && (
-				<Box>
+			</Grid>
+		</Grid >
+		<Grid container spacing={2}>
+			{cityName && (
+				<Grid item xs>
+					<Typography padding={3} variant="h4">Showing results for {cityName}:</Typography>
 					<Weather lat={lat} long={long} />
-				</Box>
+				</Grid>
 			)}
 		</Grid >
+		</>
 	);
 };
 
