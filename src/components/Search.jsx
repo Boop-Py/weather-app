@@ -1,63 +1,63 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
-import moment from 'moment';
+import { Button, Grid, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
+import Weather from './Weather';
 
 const Search = () => {
+	const [lat, setLat] = useState("");
+	const [long, setLong] = useState("");
+	const [location, setLocation] = useState("");
+	const [cityName, setCityName] = useState("");
 
-    const [weatherData, setWeatherData] = useState([])
+	const searchLocation = async () => {
+		const geocodingApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${location}&count=1&language=en&format=json`
+		try {
+			const response = await fetch(geocodingApiUrl);
+			const data = await response.json();
+			setLocation(data);
+			setLat(data.results[0].latitude)
+			setLong(data.results[0].longitude)
+			setCityName(data.results[0].name)
+		} catch (error) {
+			console.error('Error fetching location data:', error);
+		}
+		// TODO: add some decent error handling for incorrect searches
+		// TODO: also, autocomplete would be cool.
+	};
 
-    const latitude = 50
-    const longitude = 50
+	const handleChange = (e) => {
+		setLocation(e.target.value);
+	}
 
-    const url = "https://api.open-meteo.com/v1/forecast";
+	const handleSubmit = () => {
+		searchLocation(location);
+	}
 
-    useEffect(() => {
-        const dailyWeatherBuilder = (data) => {
-            const dailyWeatherArray = [];
-            for (let i = 0; i < 5; i++) {
-                const formattedDate = new Date(data.daily.time[i])
-                dailyWeatherArray.push({
-                    date: moment(formattedDate).format("Do MMM YY"),
-                    dayOfWeek: moment(formattedDate).format('dddd'),
-                    weatherCode: data.daily.weather_code[i],
-                    minTemp: data.daily.temperature_2m_min[i],
-                    maxTemp: data.daily.temperature_2m_max[i],
-                    windSpeed: data.daily.wind_speed_10m_max[i]
-                })
-                setWeatherData(dailyWeatherArray);
-            }
-            return dailyWeatherArray
-        }
+	return (
+		<>
+		<Grid container spacing={2}>
+			<Grid item xs={12}>
+				<TextField
+					variant='outlined'
+					label='Enter City'
+					onChange={handleChange}
+					fullWidth
+				>
+				</TextField>
+			</Grid>
+			<Grid item>
+				<Button variant="contained" size="large" onClick={handleSubmit}>Search</Button>
+			</Grid>
+		</Grid >
+		<Grid container spacing={2}>
+			{cityName && (
+				<Grid item xs>
+					<Typography padding={3} variant="h4">Showing results for {cityName}:</Typography>
+					<Weather lat={lat} long={long} />
+				</Grid>
+			)}
+		</Grid >
+		</>
+	);
+};
 
-        const getWeatherData = async () => {
-            // params for weather code, temperature range & wind speed
-            const weatherApi = `${url}?latitude=${latitude}&longitude=${longitude}&hourly=&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=GMT`;
-            try {
-                const response = await fetch(weatherApi);
-                const data = await response.json();
-                dailyWeatherBuilder(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        getWeatherData();
-    }, [latitude, longitude]);
-    return (
-        <div>
-            {weatherData && (
-                weatherData.map(dailyWeather => (
-                    <Card>
-                        <CardContent>
-                            <Typography>Date: {dailyWeather.date}</Typography>
-                            <Typography>Day: {dailyWeather.dayOfWeek}</Typography>
-                            <Typography>Weather Code:{dailyWeather.weatherCode}</Typography>
-                            <Typography>Temperature Range(C): {dailyWeather.minTemp}-{dailyWeather.maxTemp}</Typography>
-                            <Typography>Wind Speed: {dailyWeather.windSpeed}</Typography>
-                        </CardContent>
-                    </Card>
-                ))
-            )}
-        </div>
-    )
-}
 export default Search;
