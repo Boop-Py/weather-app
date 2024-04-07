@@ -1,63 +1,54 @@
+import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
-import moment from 'moment';
+import Weather from './Weather';
 
 const Search = () => {
+	const lat = 50;
+	const long = 50;
+	const [location, setLocation] = useState("");
 
-    const [weatherData, setWeatherData] = useState([])
+	const searchLocation = async () => {
+		const geocodingApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${location}&count=1&language=en&format=json`
+		try {
+			const response = await fetch(geocodingApiUrl);
+			const data = await response.json();
+			setLocation(data);
+			console.log(data.results[0].latitude)
+			console.log(data.results[0].longitude)
+		} catch (error) {
+			console.error('Error fetching location data:', error);
+		}
+	};
 
-    const latitude = 50
-    const longitude = 50
 
-    const url = "https://api.open-meteo.com/v1/forecast";
+	const handleChange = (e) => {
+		setLocation(e.target.value);
+	}
 
-    useEffect(() => {
-        const dailyWeatherBuilder = (data) => {
-            const dailyWeatherArray = [];
-            for (let i = 0; i < 5; i++) {
-                const formattedDate = new Date(data.daily.time[i])
-                dailyWeatherArray.push({
-                    date: moment(formattedDate).format("Do MMM YY"),
-                    dayOfWeek: moment(formattedDate).format('dddd'),
-                    weatherCode: data.daily.weather_code[i],
-                    minTemp: data.daily.temperature_2m_min[i],
-                    maxTemp: data.daily.temperature_2m_max[i],
-                    windSpeed: data.daily.wind_speed_10m_max[i]
-                })
-                setWeatherData(dailyWeatherArray);
-            }
-            return dailyWeatherArray
-        }
+	const handleSubmit = () => {
+		searchLocation(location);
+	}
 
-        const getWeatherData = async () => {
-            // params for weather code, temperature range & wind speed
-            const weatherApi = `${url}?latitude=${latitude}&longitude=${longitude}&hourly=&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=GMT`;
-            try {
-                const response = await fetch(weatherApi);
-                const data = await response.json();
-                dailyWeatherBuilder(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        getWeatherData();
-    }, [latitude, longitude]);
-    return (
-        <div>
-            {weatherData && (
-                weatherData.map(dailyWeather => (
-                    <Card>
-                        <CardContent>
-                            <Typography>Date: {dailyWeather.date}</Typography>
-                            <Typography>Day: {dailyWeather.dayOfWeek}</Typography>
-                            <Typography>Weather Code:{dailyWeather.weatherCode}</Typography>
-                            <Typography>Temperature Range(C): {dailyWeather.minTemp}-{dailyWeather.maxTemp}</Typography>
-                            <Typography>Wind Speed: {dailyWeather.windSpeed}</Typography>
-                        </CardContent>
-                    </Card>
-                ))
-            )}
-        </div>
-    )
-}
+	return (
+		<Grid>
+			<Box padding={4} sx={{
+				width: '90%', maxWidth: '100%'
+			}}>
+				<TextField
+					variant='outlined'
+					label='Enter City'
+					onChange={handleChange}
+					fullWidth>
+				</TextField>
+				<Button variant="contained" size="large" onClick={handleSubmit}>Search</Button>
+			</Box>
+			{location && (
+				<Box>
+					<Weather lat={lat} long={long} />
+				</Box>
+			)}
+		</Grid >
+	);
+};
+
 export default Search;
